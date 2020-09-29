@@ -1,0 +1,36 @@
+# Source: System
+FROM ubuntu:latest
+
+# Current Working Directory
+WORKDIR /usr/src/app
+RUN chmod 777 /usr/src/app 
+
+# Set QuietMode on 
+ENV DEBIAN_FRONTEND noninteractive
+
+# Install Requirements and Dependencies for Running
+RUN apt-get -qq update && \
+	apt-get -qq install -y wget curl p7zip-full p7zip-rar aria2 curl pv jq ffmpeg locales python3-lxml python3-pip git \
+	libmms0 libc-ares2 libc6 libcrypto++6 libgcc1 libmediainfo0v5 libpcre3 libpcrecpp0v5 libssl1.1 libstdc++6 libzen0v5 zlib1g apt-transport-https # Mega deps
+RUN curl -sL -o /var/cache/apt/archives/MEGAcmd.deb https://mega.nz/linux/MEGAsync/Debian_9.0/amd64/megacmd-Debian_9.0_amd64.deb
+RUN dpkg -i /var/cache/apt/archives/MEGAcmd.deb
+
+# COPY specific files to the Container
+COPY requirements.txt .
+COPY extract /usr/local/bin
+RUN chmod +x /usr/local/bin/extract
+RUN pip3 install --no-cache-dir -r requirements.txt
+#RUN wget https://raw.githubusercontent.com/lzzy12/python-aria-mirror-bot/staging-4.0/extract -P /usr/local/bin && chmod +x /usr/local/bin/extract
+#RUN wget https://raw.githubusercontent.com/lzzy12/python-aria-mirror-bot/staging-4.0/requirements.txt && pip3 install --no-cache-dir -r requirements.txt
+
+# LANG Setting
+RUN locale-gen en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+COPY . .
+COPY netrc /root/.netrc
+RUN chmod +x aria.sh
+
+CMD ["bash", "start.sh"]

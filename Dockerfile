@@ -13,8 +13,8 @@ ENV DEBIAN_FRONTEND noninteractive
 # FIX DOCKER-DNS-BROKEN
 
 # Install Requirements and Dependencies for Running
-RUN yum install epel-release -y && yum update -y && \
-	yum install -y wget curl p7zip p7zip-plugin aria2 pv jq python3-lxml python3-pip git ca-certificates
+RUN yum update -y && yum install epel-release -y && yum update -y && \
+	yum install -y wget curl p7zip p7zip-plugins aria2 pv jq python3-lxml python3-pip git ca-certificates
 
 # Failed-Package: ffmpeg, locales, mega-deps
 RUN dnf install epel-release dnf-utils -y && \

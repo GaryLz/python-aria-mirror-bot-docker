@@ -20,8 +20,6 @@ COPY requirements.txt .
 COPY extract /usr/local/bin
 RUN chmod +x /usr/local/bin/extract
 RUN pip3 install --no-cache-dir -r requirements.txt
-#RUN wget https://raw.githubusercontent.com/lzzy12/python-aria-mirror-bot/staging-4.0/extract -P /usr/local/bin && chmod +x /usr/local/bin/extract
-#RUN wget https://raw.githubusercontent.com/lzzy12/python-aria-mirror-bot/staging-4.0/requirements.txt && pip3 install --no-cache-dir -r requirements.txt
 
 # LANG Setting
 RUN locale-gen en_US.UTF-8

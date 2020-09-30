@@ -13,8 +13,10 @@ ENV DEBIAN_FRONTEND noninteractive
 # FIX DOCKER-DNS-BROKEN
 
 # Install Requirements and Dependencies for Running
-RUN yum install epel-release -y && yum update -y && \
-	yum install -y wget curl p7zip p7zip-plugin aria2 pv jq python3-lxml python3-pip git ca-certificates
+RUN yum update -y && yum install epel-release -y && yum update -y && \
+	yum install -y wget curl p7zip p7zip-plugins aria2 pv jq python3-lxml python3-pip git ca-certificates
+# fix pip3 install Error
+RUN yum install python3-devel gcc -y  
 
 # Failed-Package: ffmpeg, locales, mega-deps
 RUN dnf install epel-release dnf-utils -y && \
@@ -22,18 +24,19 @@ RUN dnf install epel-release dnf-utils -y && \
 	yum-config-manager --add-repo=https://negativo17.org/repos/epel-multimedia.repo
 RUN dnf install ffmpeg -y
 
-RUN localedef -i en_US -f UTF-8 en_US.UTF-8
+# RPM Install Mega-cmd
+#RUN curl -fsSL -o /usr/src/app/MEGAcmd.rpm https://mega.nz/linux/MEGAsync/CentOS_8/x86_64/megacmd-1.3.0-3.1.x86_64.rpm
+#RUN rpm -i /usr/src/app/MEGAcmd.rpm
 
-RUN curl -sL -o /var/cache/apt/archives/MEGAcmd.rpm https://mega.nz/linux/MEGAsync/CentOS_8/x86_64/megacmd-1.3.0-3.1.x86_64.rpm
-RUN rpm -i /var/cache/apt/archives/MEGAcmd.deb
 # COPY specific files to the Container
 COPY requirements.txt .
 COPY extract /usr/local/bin
 RUN chmod +x /usr/local/bin/extract
+# Pip3 install requirements
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # LANG Setting
-#RUN locale-gen en_US.UTF-8
+#RUN localedef -i en_US -f UTF-8 en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8

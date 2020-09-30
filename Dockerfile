@@ -1,48 +1,34 @@
 # Source: System
-FROM centos:latest
-
-LABEL maintainer="GaryLz"
+FROM ubuntu:latest
 
 # Current Working Directory
 WORKDIR /usr/src/app
 RUN chmod 777 /usr/src/app 
 
-# Disable interactive functions
+# Set QuietMode on 
 ENV DEBIAN_FRONTEND noninteractive
 
-# Fix ERROR DOCKER-DNS-BROKEN
-
 # Install Requirements and Dependencies for Running
-RUN yum update -y && yum install epel-release -y && yum update -y && \
-	yum install -y wget curl p7zip p7zip-plugins aria2 pv jq python3-lxml python3-pip git ca-certificates
+RUN apt-get -qq update && \
+	apt-get -qq install -y wget curl p7zip-full p7zip-rar aria2 curl pv jq ffmpeg locales python3-lxml python3-pip git \
+	libmms0 libc-ares2 libc6 libcrypto++6 libgcc1 libmediainfo0v5 libpcre3 libpcrecpp0v5 libssl1.1 libstdc++6 libzen0v5 zlib1g apt-transport-https # Mega deps
+RUN curl -sL -o /var/cache/apt/archives/MEGAcmd.deb https://mega.nz/linux/MEGAsync/Debian_9.0/amd64/megacmd-Debian_9.0_amd64.deb
+RUN dpkg -i /var/cache/apt/archives/MEGAcmd.deb
 
-# Failed-Package: ffmpeg, locales, mega-deps
-RUN dnf install epel-release dnf-utils -y && \
-	yum-config-manager --set-enabled PowerTools && \
-	yum-config-manager --add-repo=https://negativo17.org/repos/epel-multimedia.repo
-RUN dnf install ffmpeg -y
-
-# RPM Install Mega-cmd
-#RUN curl -fsSL -o /usr/src/app/MEGAcmd.rpm https://mega.nz/linux/MEGAsync/CentOS_8/x86_64/megacmd-1.3.0-3.1.x86_64.rpm
-#RUN rpm -i /usr/src/app/MEGAcmd.rpm
-
-# Fix ERROR pip3 install 
-RUN yum install python3-devel gcc -y  
-# Pip3 install requirements
-RUN wget -qc https://raw.githubusercontent.com/magneto261290/magneto-python-aria/master/requirements.txt && pip3 install --no-cache-dir -r requirements.txt
-
+# COPY specific files to the Container
+COPY requirements.txt .
+COPY extract /usr/local/bin
+RUN chmod +x /usr/local/bin/extract
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # LANG Setting
-#RUN localedef -i en_US -f UTF-8 en_US.UTF-8
+RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-
-# COPY specific files to the Container
-RUN wget -qc https://raw.githubusercontent.com/magneto261290/magneto-python-aria/master/extract -P /usr/local/bin && chmod +x /usr/local/bin/extract
-RUN wget -qc https://raw.githubusercontent.com/magneto261290/magneto-python-aria/master/netrc -O /root/.netrc
-RUN git clone https://github.com/magneto261290/magneto-python-aria /root/mirror-bot && cp -rf /root/mirror-bot/. .
+COPY . .
+COPY netrc /root/.netrc
 RUN chmod +x aria.sh
 
 CMD ["bash", "start.sh"]
